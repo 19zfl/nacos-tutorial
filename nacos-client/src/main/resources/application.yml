@@ -1,0 +1,10 @@
+server:
+  port: 1020
+spring:
+  application:
+    name: nacos-client
+  cloud:
+    nacos:
+      discovery:
+        # Nacos 注册中心地址
+        server-addr: 127.0.0.1:8848
