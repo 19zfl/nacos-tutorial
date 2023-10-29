@@ -633,3 +633,63 @@ public class PayController {
 ![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310292324238.png)
 
 出现如图所示结果就说明使用Feign来完成服务之间的通信没有问题。
+
+#### 5.fallback
+
+fallback翻译过来就是回滚的意思，比如支付服务与服务端通信的时候由于某种原因调用服务端的接口失败，总不能将类似下图这种信息直接返回给用户吧，为了更友好的展示给用户，需要编写一个回滚方法。
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310292334562.png)
+
+##### 编写回滚类：
+
+```PersonFeignClientFallback.java
+package com.nacos.tutorial.kernel.feign.fallback;
+
+import com.nacos.tutorial.kernel.feign.client.ServerPersonFeignClient;
+import com.nacos.tutorial.kernel.pojo.Person;
+import feign.hystrix.FallbackFactory;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author: 19zfl
+ * @description: 回滚方法
+ * @date 2023-10-29
+ */
+
+@Component
+public class PersonFeignClientFallback implements FallbackFactory<ServerPersonFeignClient> {
+    @Override
+    public ServerPersonFeignClient create(Throwable throwable) {
+        return new ServerPersonFeignClient() {
+            @Override
+            public Person getPersonInfoById(Long id) {
+                throwable.printStackTrace();
+                return new Person(0000L, "网络异常！", "0000");
+            }
+        };
+    }
+}
+```
+
+##### Feign接口开启回滚并指向对应fallback类：
+
+```java
+@FeignClient(value = "nacos-server", fallbackFactory = PersonFeignClientFallback.class)
+// 只需要在之前的注解中添加fallbackFactory属性，属性值为回滚类.class
+```
+
+##### yml开启Feign-hystrix：
+
+```yml
+feign:
+  hystrix:
+    enabled: true # Feign是包含hystrix的，但默认是关闭的，开启需要添加此段配置
+```
+
+##### 测试：
+
+当我们的服务端出现问题无法访问的时候（服务端关闭），就会调用回滚方法，如图所示就代表Feign的熔断功能开启成功：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310300001014.png)
+
+### 六、Nacos功能
