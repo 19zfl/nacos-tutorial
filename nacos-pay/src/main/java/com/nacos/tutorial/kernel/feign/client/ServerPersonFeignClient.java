@@ -1,11 +1,12 @@
 package com.nacos.tutorial.kernel.feign.client;
 
+import com.nacos.tutorial.kernel.feign.fallback.PersonFeignClientFallback;
 import com.nacos.tutorial.kernel.pojo.Person;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient("nacos-server") // 指向该接口通信的服务名称
+@FeignClient(value = "nacos-server", fallbackFactory = PersonFeignClientFallback.class) // value指向该接口通信的服务名称
 public interface ServerPersonFeignClient {
 
     /**
