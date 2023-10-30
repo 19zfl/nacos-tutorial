@@ -8,3 +8,5 @@ spring:
       discovery:
         # Nacos 注册中心地址
         server-addr: 127.0.0.1:8848
+        ephemeral: false # 默认是true（true是临时实例，false是持久实例）
+        cluster-name: beijing # 指定集群名字
