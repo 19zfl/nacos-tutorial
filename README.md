@@ -698,4 +698,47 @@ feign:
 
 ### 七、Nacos集群
 
-略~
+##### 1.将nacos安装包复制多份到同一文件夹中
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302314407.png)
+
+##### 2.新增cluster.conf文件
+
+- 随便进入一个nacos安装目录，进入conf文件夹，找到cluster.conf.example文件，用记事本打开
+
+- 找到本机IP地址（提供两种方法）：
+
+  - 1.单机启动一个nacos，官网找到集群管理-节点管理：
+
+    ![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302320718.png)
+
+  - 2.win+r进入cmd，输入ipconfig：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302321353.png)
+
+- 复制IP地址后，粘贴到cluster.conf文件中（如下图所示），每个nacos安装路径conf中要有一模一样的文件；
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302329602.png)
+
+##### 3.修改每个nacos的端口号
+
+修改端口号在配置文件application.properties中，按照上图分配端口号；
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302332084.png)
+
+nacos1：8848
+
+nacos2：8858
+
+nacos3：8868
+
+##### 4.启动nacos服务
+
+- 在这里直接启动nacos服务是会报错的：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310302337383.png)
+
+- 应在输入`startup.cmd -p embedded`
+
+embedded：表示使用内置数据源，我们也可以使用mysql数据源，这里不是用，不然无法启动服务；
+
