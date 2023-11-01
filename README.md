@@ -1,4 +1,11 @@
-# SpringCloudAlibaba-Nacos教程
+# SpringCloudAlibaba自学记录
+
+已学：
+
+- Nacos：服务注册/发现，分布式配置中心
+- Ribbon：负载均衡（非）
+- Feign：服务调用（非）
+- Hystrix：服务熔断（FallbackFactory）（非）
 
 ### 一、Nacos官网
 
@@ -694,7 +701,7 @@ feign:
 
 ### 六、Nacos功能
 
-略~
+后续了解；
 
 ### 七、Nacos集群
 
@@ -742,3 +749,163 @@ nacos3：8868
 
 embedded：表示使用内置数据源，我们也可以使用mysql数据源，这里不是用，不然无法启动服务；
 
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310311653328.png)
+
+出现上图就代表nacos集群部署成功，下图为nacos官网集群信息：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202310311657572.png)
+
+<mark>问题：为什么我使用Nacos2.2.3同样的操作，集群部署失败，换成Nacos2.1.1就立马成功了？</mark>
+
+> 等回复~
+
+### 八、Nacos分布式配置中心
+
+##### 1.为什么需要配置中心？
+
+> 1.微服务项目中，服务很多，每一个服务都有自己的配置文件，在开发过程中修改配置文件并没有什么问题，如果项目上线后，修改配置就会很麻烦；
+>
+> 2.就算修改后，这个服务又要重新打包项目，再次部署一次，在这阶段，这个服务是无法访问的。
+
+##### 2.代码演示
+
+###### 2.1 server微服务pom.xml导入相关依赖
+
+```pom.xml
+		<!--配置中心依赖-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+```
+
+现阶段只需要知道如果要使用nacos的配置中心就需要导入这个nacos-config依赖；
+
+###### 2.2 在nacos官网中配云端配置需要的配置信息
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010855683.png)
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010854574.png)
+
+nacos配置中心新建的配置文件命名为：application-server-dev.yaml，这里有几个重要的字段要记住：
+
+- Data ID：非常重要，配置文件的名称，在服务拉取配置文件的时候就需要Data ID（重要）；
+- Group：分组，默认是DEFAULT_GROUP，可以针对不同的项目指定不同的配置组（目前作为了解）；
+
+###### 2.3 server微服务的resources目录下，新建bootstrap.yml，内容如下：
+
+```bootstrap.yml
+server:
+  port: 1010
+spring:
+  application:
+    name: nacos-server
+  cloud:
+    nacos:
+      #注册中心相关配置
+      discovery:
+        server-addr: 127.0.0.1:8848 #注册中心地址
+      #配置中心相关配置
+      config:
+        server-addr: 127.0.0.1:8848 #配置中心地址
+        file-extension: yaml        #配置文件格式
+        prefix: application-server    #配置前缀
+        group: DEFAULT_GROUP        #默认分组
+  profiles:
+    active: dev  #指定环境
+```
+
+程序在nacos配置中心找到配置文件的时候，会先进行配置文件名称的拼接【prefix+active+"."+file-extension】，然后再去Nacos上查找是否有对应Data ID的配置文件。
+
+###### 2.4 ServerController修改
+
+```ServerController.java
+package com.nacos.tutorial.kernel.controller;
+
+import com.nacos.tutorial.kernel.pojo.Person;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.sound.sampled.Port;
+
+/**
+ * @author: 19zfl
+ * @description: 服务端控制层
+ * @date 2023-09-27
+ */
+@RestController
+@RequestMapping("/server")
+@RefreshScope // 动态加载配置文件
+public class ServerController {
+
+    @Value("${server.port}")
+    private String port;
+
+    @Value("${temp.value}")
+    private String value;
+
+    @GetMapping("/getPersonInfoById/{id}")
+    public Person getPersonInfoById(@PathVariable Long id) {
+        return new Person(id, "temp:" + value, "port：" + port);
+    }
+
+}
+```
+
+###### 2.5 测试
+
+启动server微服务和pay微服务，在浏览器中输入`http://localhost:1040/pay/getPersonInfoById/11`将会得到：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010908719.png)
+
+下一步，在nacos配置中心中修改配置文件中temp.value的值：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010909239.png)
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010910426.png)
+
+然后刷新刚才访问的链接：
+
+![image-20231101091135227](C:\Users\zfl19\AppData\Roaming\Typora\typora-user-images\image-20231101091135227.png)
+
+可以看到已经成功修改，并且也没有重启server微服务。
+
+##### 3.持久化
+
+进入Nacos安装目录，conf中会有sql文件，执行：
+
+- nacos2.2.3：mysql-schema.sql
+- nacos2.1.1：nacos-mysql.sql
+
+执行完成后数据库会自动添加这几张表：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010924571.png)
+
+warning：只有配置中心的信息才会存入mysql，注册中心的信息不会。
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010927169.png)
+
+打开上图这个文件，这个文件在nacos安装目录-conf里面，修改下图配置信息：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010930352.png)
+
+然后重启Nacos，进入nacos官网你会发现刚才的配置没有了，
+
+![image-20231101093247533](C:\Users\zfl19\AppData\Roaming\Typora\typora-user-images\image-20231101093247533.png)
+
+数据库config_info表：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010934021.png)
+
+重新创建一个配置之后刷新数据库中config_info表，此时为：
+
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010936782.png)
+
+warning：
+
+- nacos配置中心删除某一配置之后，config_info表中的数据也会同步删除；
+- 开启持久化之后，就算nacos重启，之前配置的配置信息也都不会丢失，不开启则会丢失；
