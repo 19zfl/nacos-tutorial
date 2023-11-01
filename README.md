@@ -870,7 +870,7 @@ public class ServerController {
 
 然后刷新刚才访问的链接：
 
-![image-20231101091135227](C:\Users\zfl19\AppData\Roaming\Typora\typora-user-images\image-20231101091135227.png)
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010952764.png)
 
 可以看到已经成功修改，并且也没有重启server微服务。
 
@@ -895,7 +895,7 @@ warning：只有配置中心的信息才会存入mysql，注册中心的信息�
 
 然后重启Nacos，进入nacos官网你会发现刚才的配置没有了，
 
-![image-20231101093247533](C:\Users\zfl19\AppData\Roaming\Typora\typora-user-images\image-20231101093247533.png)
+![](https://gitee.com/coder_zfl/markdown-image-cloud-drive/raw/master/markdown/202311010953998.png)
 
 数据库config_info表：
 
