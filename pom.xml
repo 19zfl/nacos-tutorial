@@ -13,6 +13,7 @@
         <module>nacos-client</module>
         <module>nacos-common</module>
         <module>nacos-pay</module>
+        <module>server-gateway</module>
     </modules>
 
     <developers>

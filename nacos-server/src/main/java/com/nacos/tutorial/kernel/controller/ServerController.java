@@ -23,12 +23,12 @@ public class ServerController {
     @Value("${server.port}")
     private String port;
 
-    @Value("${temp.value}")
-    private String value;
+//    @Value("${temp.value}")
+//    private String value;
 
     @GetMapping("/getPersonInfoById/{id}")
     public Person getPersonInfoById(@PathVariable Long id) {
-        return new Person(id, "temp:" + value, "port：" + port);
+        return new Person(id, "temp:" + port, "port：" + port);
     }
 
 }

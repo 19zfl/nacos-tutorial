@@ -1,0 +1,13 @@
+server:
+  port: 1050
+spring:
+  application:
+    name: server-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true #这个一定要配置，默认是false，改成true后，目的是让Gateway服务可以发现Nacos中的微服务
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 #注册中心地址

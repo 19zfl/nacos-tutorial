@@ -3,9 +3,10 @@
 已学：
 
 - Nacos：服务注册/发现，分布式配置中心
-- Ribbon：负载均衡（非）
-- Feign：服务调用（非）
-- Hystrix：服务熔断（FallbackFactory）（非）
+- Ribbon：负载均衡
+- Feign：服务调用
+- Hystrix：服务熔断（FallbackFactory）
+- Gateway：网关
 
 ### 一、Nacos官网
 
